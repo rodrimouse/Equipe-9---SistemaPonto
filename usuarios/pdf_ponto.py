@@ -467,8 +467,10 @@ def gerar_pdf_ponto(caminho_modelo, professores: List[ProfessorPonto], mes: int,
     for prof in professores:
         overlay = _overlay(prof, mes, ano, unidade, (marca or "sigla").lower(), avisos, feriados)
         modelo = PdfReader(io.BytesIO(modelo_bytes))
-        modelo.pages[0].merge_page(overlay)
-        for pagina in modelo.pages:
+        # a página precisa pertencer ao writer ANTES do merge (exigência do pypdf 7+)
+        primeira = saida.add_page(modelo.pages[0])
+        primeira.merge_page(overlay)
+        for pagina in modelo.pages[1:]:
             saida.add_page(pagina)
     buf = io.BytesIO()
     saida.write(buf)
