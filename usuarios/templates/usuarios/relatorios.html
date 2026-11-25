@@ -1,0 +1,34 @@
+{% extends "usuarios/base.html" %}
+{% block titulo %}Relatórios{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+  <div><h1>Relatório mensal</h1><p class="sub">Aulas previstas, perdidas e ministradas por professor (descontando feriados e ocorrências).</p></div>
+  <form method="GET" style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">
+    <div><label class="campo" for="mes" style="margin-top:0">Mês</label><select name="mes" id="mes"><option value="1"{% if mes_atual == 1 %} selected{% endif %}>Janeiro</option><option value="2"{% if mes_atual == 2 %} selected{% endif %}>Fevereiro</option><option value="3"{% if mes_atual == 3 %} selected{% endif %}>Março</option><option value="4"{% if mes_atual == 4 %} selected{% endif %}>Abril</option><option value="5"{% if mes_atual == 5 %} selected{% endif %}>Maio</option><option value="6"{% if mes_atual == 6 %} selected{% endif %}>Junho</option><option value="7"{% if mes_atual == 7 %} selected{% endif %}>Julho</option><option value="8"{% if mes_atual == 8 %} selected{% endif %}>Agosto</option><option value="9"{% if mes_atual == 9 %} selected{% endif %}>Setembro</option><option value="10"{% if mes_atual == 10 %} selected{% endif %}>Outubro</option><option value="11"{% if mes_atual == 11 %} selected{% endif %}>Novembro</option><option value="12"{% if mes_atual == 12 %} selected{% endif %}>Dezembro</option></select></div>
+    <div><label class="campo" for="ano" style="margin-top:0">Ano</label><input type="number" name="ano" id="ano" min="2000" max="2100" value="{{ ano_atual }}" style="width:100px"></div>
+    <button type="submit" class="btn">Atualizar</button>
+    <a class="btn btn-sec" href="?mes={{ mes }}&amp;ano={{ ano }}&amp;csv=1">Exportar CSV</a>
+  </form>
+</div>
+{% if linhas %}
+<div class="tabela-wrap"><table class="tabela">
+  <thead><tr><th>Professor</th><th class="num">Aulas/semana</th><th class="num">Previstas</th><th class="num">Perdidas</th><th class="num">Reposição</th><th class="num">Ministradas</th><th class="num">Horas</th><th>Ocorrências</th></tr></thead>
+  <tbody>
+  {% for l in linhas %}
+    <tr>
+      <td><strong>{{ l.professor.nome }}</strong>{% if l.professor.matricula %}<span class="pequeno">matrícula {{ l.professor.matricula }}</span>{% endif %}</td>
+      <td class="num">{{ l.aulas_semana }}</td><td class="num">{{ l.previstas }}</td>
+      <td class="num">{{ l.perdidas }}</td><td class="num">{{ l.extras }}</td>
+      <td class="num"><strong>{{ l.ministradas }}</strong></td><td class="num">{{ l.horas }}</td>
+      <td>{% if l.detalhe %}{{ l.detalhe }}{% else %}—{% endif %}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+  <tfoot><tr><td>Total</td><td></td><td class="num">{{ totais.previstas }}</td><td class="num">{{ totais.perdidas }}</td><td class="num">{{ totais.extras }}</td><td class="num">{{ totais.ministradas }}</td><td class="num">{{ totais.horas }}</td><td></td></tr></tfoot>
+</table></div>
+<p class="dica" style="margin-top:10px">Hora = aulas ministradas × 50 min. Domingos e feriados não entram nas aulas previstas.
+{% if feriados_mes %}Feriados no mês: {% for d, desc in feriados_mes %}{{ d|date:"d/m" }} ({{ desc }}){% if not forloop.last %}, {% endif %}{% endfor %}.{% endif %}</p>
+{% else %}
+<div class="cartao vazio">Nenhum professor cadastrado ainda.</div>
+{% endif %}
+{% endblock %}

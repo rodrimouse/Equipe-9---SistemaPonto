@@ -1,0 +1,47 @@
+{
+  "_leia_me": "EXEMPLO com dados ficticios. Substitua pelos nomes reais e rode: python manage.py popular_banco  (pode rodar varias vezes sem duplicar). Dias: Segunda, Terca, Quarta, Quinta, Sexta, Sabado. Horarios: HH:MM, aulas de 50 min (noite: 19:00-19:50, 19:50-20:40, 21:00-21:50, 21:50-22:40).",
+
+  "cursos": [
+    "Análise e Desenvolvimento de Sistemas",
+    "Gestão Empresarial"
+  ],
+
+  "disciplinas": [
+    {"nome": "Algoritmos e Lógica de Programação", "carga_horaria": 80, "curso": "Análise e Desenvolvimento de Sistemas"},
+    {"nome": "Estrutura de Dados",                 "carga_horaria": 80, "curso": "Análise e Desenvolvimento de Sistemas"},
+    {"nome": "Banco de Dados",                     "carga_horaria": 80, "curso": "Análise e Desenvolvimento de Sistemas"},
+    {"nome": "Engenharia de Software",             "carga_horaria": 80, "curso": "Análise e Desenvolvimento de Sistemas"},
+    {"nome": "Programação Web",                    "carga_horaria": 80, "curso": "Análise e Desenvolvimento de Sistemas"},
+    {"nome": "Redes de Computadores",              "carga_horaria": 40, "curso": "Análise e Desenvolvimento de Sistemas"},
+    {"nome": "Sistemas Operacionais",              "carga_horaria": 80, "curso": "Análise e Desenvolvimento de Sistemas"},
+    {"nome": "Administração Geral",                "carga_horaria": 80, "curso": "Gestão Empresarial"},
+    {"nome": "Marketing",                          "carga_horaria": 40, "curso": "Gestão Empresarial"},
+    {"nome": "Matemática Financeira",              "carga_horaria": 80, "curso": "Gestão Empresarial"}
+  ],
+
+  "professores": [
+    {"nome": "Ana Paula Ribeiro",      "email": "ana.ribeiro@exemplo.com",    "matricula": "100201", "regime_juridico": "CLT", "categoria": "Prof. I",  "hora_atividade": "6"},
+    {"nome": "Carlos Eduardo Menezes", "email": "carlos.menezes@exemplo.com", "matricula": "100202", "regime_juridico": "CLT", "categoria": "Prof. II", "hora_atividade": "6", "hae_o": "2"},
+    {"nome": "Fernanda Lopes Carvalho","email": "fernanda.lopes@exemplo.com", "matricula": "100203", "regime_juridico": "CLT", "categoria": "Prof. I"},
+    {"nome": "Ricardo Tavares Souza",  "email": "ricardo.tavares@exemplo.com","matricula": "100204", "regime_juridico": "CLT", "categoria": "Prof. III","hae_c": "4"},
+    {"nome": "Juliana Matos Ferreira", "email": "juliana.matos@exemplo.com",  "matricula": "100205", "regime_juridico": "CLT", "categoria": "Prof. I"}
+  ],
+
+  "horarios": [
+    {"professor": "Ana Paula Ribeiro", "disciplina": "Algoritmos e Lógica de Programação", "dias": ["Segunda", "Quarta"], "inicio": "19:00", "fim": "20:40"},
+    {"professor": "Ana Paula Ribeiro", "disciplina": "Estrutura de Dados",                 "dias": ["Quinta"],            "inicio": "21:00", "fim": "22:40"},
+
+    {"professor": "Carlos Eduardo Menezes", "disciplina": "Banco de Dados",         "dias": ["Terça", "Quinta"], "inicio": "19:00", "fim": "20:40"},
+    {"professor": "Carlos Eduardo Menezes", "disciplina": "Engenharia de Software", "dias": ["Sexta"],           "inicio": "19:00", "fim": "22:40"},
+
+    {"professor": "Fernanda Lopes Carvalho", "disciplina": "Programação Web", "dias": ["Segunda", "Quarta"], "inicio": "08:00", "fim": "10:30"},
+    {"professor": "Fernanda Lopes Carvalho", "disciplina": "Redes de Computadores", "dias": ["Sábado"], "inicio": "11:00", "fim": "12:40", "tipo": "online"},
+
+    {"professor": "Ricardo Tavares Souza", "disciplina": "Sistemas Operacionais",  "dias": ["Terça", "Quinta"], "inicio": "13:00", "fim": "15:30"},
+    {"professor": "Ricardo Tavares Souza", "disciplina": "Redes de Computadores",  "dias": ["Sexta"],           "inicio": "16:00", "fim": "17:40"},
+
+    {"professor": "Juliana Matos Ferreira", "disciplina": "Administração Geral",   "dias": ["Segunda", "Quarta"], "inicio": "19:00", "fim": "20:40"},
+    {"professor": "Juliana Matos Ferreira", "disciplina": "Marketing",             "dias": ["Terça"],             "inicio": "21:00", "fim": "22:40"},
+    {"professor": "Juliana Matos Ferreira", "disciplina": "Matemática Financeira", "dias": ["Quinta"],            "inicio": "19:00", "fim": "22:40"}
+  ]
+}

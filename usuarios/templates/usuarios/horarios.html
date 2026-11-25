@@ -1,0 +1,32 @@
+{% extends "usuarios/base.html" %}
+{% block titulo %}Horários{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+  <div><h1>Horários de aula</h1><p class="sub">Dias e horários de cada disciplina por professor.</p></div>
+  <div><a class="btn btn-sec" href="{% url 'gerar_pdf' %}">Gerar PDF</a> <a class="btn" href="{% url 'criar_horario' %}">+ Novo horário</a></div>
+</div>
+{% if horarios %}
+<input type="text" class="busca" data-filtra="#tabela" placeholder="Buscar professor, disciplina, dia...">
+<div class="tabela-wrap"><table class="tabela" id="tabela">
+  <thead><tr><th>Professor</th><th>Disciplina</th><th>Dia</th><th>Horário</th><th>Tipo</th><th></th></tr></thead>
+  <tbody>
+  {% for h in horarios %}
+    <tr>
+      <td><strong>{{ h.professor.nome }}</strong></td>
+      <td>{{ h.disciplina.nome }}</td>
+      <td>{{ h.dia_semana }}</td>
+      <td>{{ h.horario_inicio|time:"H:i" }} às {{ h.horario_fim|time:"H:i" }}</td>
+      <td><span class="badge badge-{{ h.tipo_aula }}">{{ h.get_tipo_aula_display }}</span></td>
+      <td class="acoes">
+        <form class="inline" method="POST" action="{% url 'deletar_horario' h.id %}" onsubmit="return confirm('Excluir este horário?')">
+          {% csrf_token %}<button type="submit" class="btn btn-perigo btn-pq">Excluir</button>
+        </form>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table></div>
+{% else %}
+<div class="cartao vazio">Nenhum horário cadastrado ainda. <a href="{% url 'criar_horario' %}">Cadastrar o primeiro horário</a>.</div>
+{% endif %}
+{% endblock %}

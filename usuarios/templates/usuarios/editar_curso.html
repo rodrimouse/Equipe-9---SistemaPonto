@@ -1,0 +1,13 @@
+{% extends "usuarios/base.html" %}
+{% block titulo %}Editar curso{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina"><div><h1>Editar curso</h1></div></div>
+<div class="cartao cartao-form">
+  <form method="POST">
+    {% csrf_token %}
+    <label class="campo" for="nome">Nome do curso</label>
+    <input type="text" name="nome" id="nome" value="{{ curso.nome }}" required autofocus>
+    <div class="rodape-form"><button type="submit" class="btn">Salvar</button><a class="btn btn-sec" href="{% url 'listar_cursos' %}">Cancelar</a></div>
+  </form>
+</div>
+{% endblock %}

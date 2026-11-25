@@ -1,0 +1,19 @@
+{% extends "usuarios/base.html" %}
+{% block titulo %}Nova senha{% endblock %}
+{% block classe_pagina %}pagina-auth{% endblock %}
+{% block mensagens %}{% endblock %}
+{% block conteudo %}
+<div class="auth-marca"><span class="logo">P</span><h1>Nova senha</h1></div>
+{% if messages %}{% for message in messages %}<div class="msg msg-{{ message.level_tag }}">{{ message }}</div>{% endfor %}{% endif %}
+<div class="cartao">
+  <form method="POST">
+    {% csrf_token %}
+    <label class="campo" for="senha">Nova senha</label>
+    <input type="password" name="senha" id="senha" minlength="6" required autofocus autocomplete="new-password">
+    <label class="campo" for="confirmar">Repita a nova senha</label>
+    <input type="password" name="confirmar" id="confirmar" minlength="6" required autocomplete="new-password">
+    <p class="dica">Mínimo de 6 caracteres.</p>
+    <div class="rodape-form"><button type="submit" class="btn">Salvar nova senha</button></div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "usuarios/base.html" %}
+{% block titulo %}Professor{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina"><div><h1>{% if professor %}Editar professor{% else %}Novo professor{% endif %}</h1></div></div>
+<div class="cartao cartao-form">
+  <form method="POST">
+    {% csrf_token %}
+    <label class="campo" for="nome">Nome</label>
+    <input type="text" name="nome" id="nome" value="{{ professor.nome|default:'' }}" required autofocus>
+    <label class="campo" for="email">E-mail</label>
+    <input type="email" name="email" id="email" value="{{ professor.email|default:'' }}" required>
+
+    <h2 style="margin-top:26px">Dados do cartão de ponto <span class="dica">(opcionais)</span></h2>
+    <div class="grid2">
+      <div><label class="campo" for="matricula">Matrícula</label><input type="text" name="matricula" id="matricula" value="{{ professor.matricula|default:'' }}"></div>
+      <div><label class="campo" for="regime_juridico">Regime jurídico</label><input type="text" name="regime_juridico" id="regime_juridico" value="{{ professor.regime_juridico|default:'' }}" placeholder="Ex.: CLT"></div>
+      <div><label class="campo" for="categoria">Categoria</label><input type="text" name="categoria" id="categoria" value="{{ professor.categoria|default:'' }}" placeholder="Ex.: Prof. I"></div>
+      <div><label class="campo" for="hora_atividade">Hora atividade</label><input type="text" name="hora_atividade" id="hora_atividade" value="{{ professor.hora_atividade|default:'' }}"></div>
+      <div><label class="campo" for="hae_o">HAE-O (Projeto)</label><input type="text" name="hae_o" id="hae_o" value="{{ professor.hae_o|default:'' }}"></div>
+      <div><label class="campo" for="hae_c">HAE-C (Coordenação)</label><input type="text" name="hae_c" id="hae_c" value="{{ professor.hae_c|default:'' }}"></div>
+    </div>
+    <label class="campo" for="carga_horaria_semanal">Carga horária semanal</label>
+    <input type="text" name="carga_horaria_semanal" id="carga_horaria_semanal" value="{{ professor.carga_horaria_semanal|default:'' }}">
+    <p class="dica">Deixe vazio para calcular pelo número de aulas cadastradas.</p>
+
+    <div class="rodape-form"><button type="submit" class="btn">Salvar</button><a class="btn btn-sec" href="{% url 'listar_professores' %}">Cancelar</a></div>
+  </form>
+</div>
+{% endblock %}

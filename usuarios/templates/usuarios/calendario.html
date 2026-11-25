@@ -1,0 +1,66 @@
+{% extends "usuarios/base.html" %}
+{% block titulo %}Calendário{% endblock %}
+{% block classe_pagina %}pagina-larga{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina"><div><h1>Calendário</h1>
+<p class="sub">Feriados e ocorrências (faltas, licenças, reposição) saem automaticamente na folha de ponto.</p></div></div>
+<div class="grid-cal">
+
+<div class="cartao">
+  <h2>Feriados</h2>
+  <form method="POST" action="{% url 'criar_feriado' %}">
+    {% csrf_token %}
+    <div class="form-linha">
+      <div><label class="campo" for="f-data">Data</label><input type="date" name="data" id="f-data" required></div>
+      <div><label class="campo" for="f-desc">Descrição</label><input type="text" name="descricao" id="f-desc" maxlength="60" placeholder="Ex.: Finados"></div>
+    </div>
+    <button type="submit" class="btn btn-pq">Adicionar feriado</button>
+  </form>
+  {% if feriados %}
+  <div class="tabela-wrap" style="margin-top:16px"><table class="tabela">
+    <thead><tr><th>Data</th><th>Descrição</th><th></th></tr></thead>
+    <tbody>
+    {% for f in feriados %}
+      <tr><td>{{ f.data|date:"d/m/Y" }}</td><td>{{ f.descricao }}</td>
+      <td class="acoes"><form class="inline" method="POST" action="{% url 'deletar_feriado' f.id %}" onsubmit="return confirm('Excluir este feriado?')">{% csrf_token %}<button type="submit" class="btn btn-perigo btn-pq">Excluir</button></form></td></tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% else %}<p class="dica" style="margin-top:14px">Nenhum feriado cadastrado.</p>{% endif %}
+</div>
+
+<div class="cartao">
+  <h2>Ocorrências</h2>
+  <form method="POST" action="{% url 'criar_ocorrencia' %}">
+    {% csrf_token %}
+    <div class="form-linha">
+      <div><label class="campo" for="o-prof">Professor</label>
+        <select name="professor" id="o-prof" required>{% for p in professores %}<option value="{{ p.id }}">{{ p.nome }}</option>{% endfor %}</select></div>
+      <div><label class="campo" for="o-data">Data</label><input type="date" name="data" id="o-data" required></div>
+      <div><label class="campo" for="o-cod">Código</label>
+        <select name="codigo" id="o-cod" required>{% for cod, rot in codigos %}<option value="{{ cod }}">{{ rot }}</option>{% endfor %}</select></div>
+    </div>
+    <div class="form-linha">
+      <div><label class="campo" for="o-per">Período</label>
+        <select name="periodo" id="o-per">{% for val, rot in periodos %}<option value="{{ val }}">{{ rot }}</option>{% endfor %}</select></div>
+      <div><label class="campo" for="o-aulas">Aulas</label><input type="text" name="aulas" id="o-aulas" placeholder="Ex.: 1-2 (vazio = todas)"></div>
+    </div>
+    <p class="dica">Falta (FA, FD, FM, LM, PL): marca as aulas previstas do dia. Reposição/substituição (R, S, RCD) em dia sem aula na grade: informe período e aulas.</p>
+    <button type="submit" class="btn btn-pq" style="margin-top:10px">Registrar ocorrência</button>
+  </form>
+  {% if ocorrencias %}
+  <div class="tabela-wrap" style="margin-top:16px"><table class="tabela">
+    <thead><tr><th>Data</th><th>Professor</th><th>Período</th><th>Aulas</th><th>Código</th><th></th></tr></thead>
+    <tbody>
+    {% for o in ocorrencias %}
+      <tr><td>{{ o.data|date:"d/m/Y" }}</td><td>{{ o.professor.nome }}</td><td>{{ o.get_periodo_display }}</td><td>{{ o.aulas|default:"todas" }}</td>
+      <td><span class="cod">{{ o.codigo }}</span></td>
+      <td class="acoes"><form class="inline" method="POST" action="{% url 'deletar_ocorrencia' o.id %}" onsubmit="return confirm('Excluir esta ocorrência?')">{% csrf_token %}<button type="submit" class="btn btn-perigo btn-pq">Excluir</button></form></td></tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% else %}<p class="dica" style="margin-top:14px">Nenhuma ocorrência registrada.</p>{% endif %}
+</div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "usuarios/base.html" %}
+{% block titulo %}Recuperar senha{% endblock %}
+{% block classe_pagina %}pagina-auth{% endblock %}
+{% block mensagens %}{% endblock %}
+{% block conteudo %}
+<div class="auth-marca"><span class="logo">P</span><h1>Recuperar senha</h1></div>
+{% if messages %}{% for message in messages %}<div class="msg msg-{{ message.level_tag }}">{{ message }}</div>{% endfor %}{% endif %}
+<div class="cartao">
+  <form method="POST">
+    {% csrf_token %}
+    <p class="sub" style="margin-bottom:10px">Informe o e-mail da sua conta. Enviaremos um link para criar uma nova senha.</p>
+    <label class="campo" for="email">E-mail cadastrado</label>
+    <input type="email" name="email" id="email" required autofocus>
+    <div class="rodape-form" style="justify-content:space-between">
+      <button type="submit" class="btn">Enviar link</button>
+      <a href="{% url 'login' %}">Voltar ao login</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

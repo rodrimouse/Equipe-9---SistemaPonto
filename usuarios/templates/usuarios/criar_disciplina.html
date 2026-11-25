@@ -1,0 +1,24 @@
+{% extends "usuarios/base.html" %}
+{% block titulo %}Disciplina{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina"><div><h1>{% if disciplina %}Editar disciplina{% else %}Nova disciplina{% endif %}</h1></div></div>
+{% if not cursos %}
+<div class="msg msg-warning">Cadastre um <a href="{% url 'criar_curso' %}">curso</a> antes de criar disciplinas.</div>
+{% endif %}
+<div class="cartao cartao-form">
+  <form method="POST">
+    {% csrf_token %}
+    <label class="campo" for="nome">Nome da disciplina</label>
+    <input type="text" name="nome" id="nome" value="{{ disciplina.nome|default:'' }}" required autofocus>
+    <div class="grid2">
+      <div><label class="campo" for="carga">Carga horária (horas)</label>
+      <input type="number" name="carga" id="carga" min="1" value="{{ disciplina.carga_horaria|default:'' }}" placeholder="Ex.: 80" required></div>
+      <div><label class="campo" for="curso">Curso</label>
+      <select name="curso" id="curso" required>
+        {% for c in cursos %}<option value="{{ c.id }}" {% if disciplina and disciplina.curso_id == c.id %}selected{% endif %}>{{ c.nome }}</option>{% endfor %}
+      </select></div>
+    </div>
+    <div class="rodape-form"><button type="submit" class="btn">Salvar</button><a class="btn btn-sec" href="{% url 'listar_disciplinas' %}">Cancelar</a></div>
+  </form>
+</div>
+{% endblock %}

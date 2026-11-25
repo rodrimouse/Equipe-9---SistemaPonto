@@ -1,0 +1,87 @@
+{% extends "usuarios/base.html" %}
+{% block titulo %}Gerar PDF{% endblock %}
+{% block classe_pagina %}pagina-larga{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina"><div><h1>Gerar folha de ponto</h1>
+<p class="sub">Escolha o professor e o mês: a prévia aparece sozinha.</p></div></div>
+<div class="layout">
+<div class="col-form"><div class="cartao">
+<form id="form" onsubmit="return false">
+    <label class="campo" for="professor">Professor</label>
+    <select name="professor" id="professor">
+        <option value="">Selecione...</option>
+        <option value="todos">Todos os professores (um PDF único)</option>
+        {% for p in professores %}<option value="{{ p.id }}">{{ p.nome }}</option>{% endfor %}
+    </select>
+    <div class="linha">
+        <div><label class="campo" for="mes">Mês</label><select name="mes" id="mes"><option value="1"{% if mes_atual == 1 %} selected{% endif %}>Janeiro</option><option value="2"{% if mes_atual == 2 %} selected{% endif %}>Fevereiro</option><option value="3"{% if mes_atual == 3 %} selected{% endif %}>Março</option><option value="4"{% if mes_atual == 4 %} selected{% endif %}>Abril</option><option value="5"{% if mes_atual == 5 %} selected{% endif %}>Maio</option><option value="6"{% if mes_atual == 6 %} selected{% endif %}>Junho</option><option value="7"{% if mes_atual == 7 %} selected{% endif %}>Julho</option><option value="8"{% if mes_atual == 8 %} selected{% endif %}>Agosto</option><option value="9"{% if mes_atual == 9 %} selected{% endif %}>Setembro</option><option value="10"{% if mes_atual == 10 %} selected{% endif %}>Outubro</option><option value="11"{% if mes_atual == 11 %} selected{% endif %}>Novembro</option><option value="12"{% if mes_atual == 12 %} selected{% endif %}>Dezembro</option></select></div>
+        <div><label class="campo" for="ano">Ano</label><input type="number" name="ano" id="ano" min="2000" max="2100" value="{{ ano_atual }}"></div>
+    </div>
+    <div class="rodape-form" style="flex-wrap:wrap"><a id="baixar" class="btn" href="#" style="display:none">Baixar PDF</a>
+    <a id="baixar-zip" class="btn btn-sec" href="#" style="display:none">Baixar .zip (um PDF por professor)</a></div>
+</form>
+<p id="status">Escolha um professor para ver a prévia.</p>
+<ul id="avisos" class="avisos"></ul>
+</div></div>
+<div class="col-previa"><iframe id="previa" title="Prévia do PDF"></iframe></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+(function () {
+  var form = document.getElementById('form'), frame = document.getElementById('previa'),
+      status = document.getElementById('status'), avisos = document.getElementById('avisos'),
+      baixar = document.getElementById('baixar'), zip = document.getElementById('baixar-zip');
+  var timer = null, ctrl = null, blobUrl = null;
+  var URL_PDF = "{% url 'gerar_pdf' %}";
+
+  function mostraAvisos(h) {
+    avisos.innerHTML = '';
+    if (!h) return;
+    try {
+      JSON.parse(decodeURIComponent(h)).forEach(function (t) {
+        var li = document.createElement('li'); li.textContent = t; avisos.appendChild(li);
+      });
+    } catch (e) {}
+  }
+  function atualizarPrevia(url) {
+    if (ctrl) ctrl.abort();
+    ctrl = new AbortController();
+    status.className = ''; status.textContent = 'Atualizando prévia...';
+    fetch(url, {signal: ctrl.signal, credentials: 'same-origin'}).then(function (r) {
+      var tipo = r.headers.get('Content-Type') || '';
+      if (!r.ok || tipo.indexOf('pdf') === -1) {
+        return r.text().then(function (t) {
+          avisos.innerHTML = '';
+          status.className = 'erro';
+          status.textContent = (tipo.indexOf('text/plain') === 0 && t) ? t :
+            'Não foi possível gerar a prévia. Recarregue a página e faça login novamente.';
+        });
+      }
+      mostraAvisos(r.headers.get('X-Avisos'));
+      return r.blob().then(function (b) {
+        if (blobUrl) URL.revokeObjectURL(blobUrl);
+        blobUrl = URL.createObjectURL(b);
+        frame.src = blobUrl + '#view=FitH';
+        status.textContent = '';
+      });
+    }).catch(function (e) {
+      if (e.name !== 'AbortError') { status.className = 'erro'; status.textContent = 'Falha ao atualizar a prévia.'; }
+    });
+  }
+
+  function atualizar() {
+    var p = new URLSearchParams();
+    ['professor', 'mes', 'ano'].forEach(function (n) { p.set(n, form.elements[n].value); });
+    if (!form.professor.value) { baixar.style.display = 'none'; zip.style.display = 'none'; return; }
+    var d = new URLSearchParams(p); d.set('baixar', '1');
+    baixar.href = URL_PDF + '?' + d.toString(); baixar.style.display = 'inline-block';
+    var z = new URLSearchParams(p); z.set('formato', 'zip');
+    zip.href = URL_PDF + '?' + z.toString(); zip.style.display = form.professor.value === 'todos' ? 'inline-block' : 'none';
+    atualizarPrevia(URL_PDF + '?' + p.toString());
+  }
+  form.addEventListener('change', function () { clearTimeout(timer); timer = setTimeout(atualizar, 200); });
+  form.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(atualizar, 400); });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "usuarios/base.html" %}
+{% block titulo %}Disciplinas{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+  <div><h1>Disciplinas</h1><p class="sub">Matérias de cada curso.</p></div>
+  <a class="btn" href="{% url 'criar_disciplina' %}">+ Nova disciplina</a>
+</div>
+{% if disciplinas %}
+<input type="text" class="busca" data-filtra="#tabela" placeholder="Buscar disciplina ou curso...">
+<div class="tabela-wrap"><table class="tabela" id="tabela">
+  <thead><tr><th>Disciplina</th><th>Curso</th><th>Carga horária</th><th></th></tr></thead>
+  <tbody>
+  {% for d in disciplinas %}
+    <tr>
+      <td><strong>{{ d.nome }}</strong></td>
+      <td>{{ d.curso.nome }}</td>
+      <td>{{ d.carga_horaria }} h</td>
+      <td class="acoes">
+        <a class="btn btn-sec btn-pq" href="{% url 'editar_disciplina' d.id %}">Editar</a>
+        <form class="inline" action="{% url 'deletar_disciplina' d.id %}" method="POST" onsubmit="return confirm('Excluir a disciplina {{ d.nome|escapejs }}? Os horários dela também serão excluídos.')">
+          {% csrf_token %}<button type="submit" class="btn btn-perigo btn-pq">Excluir</button>
+        </form>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table></div>
+{% else %}
+<div class="cartao vazio">Nenhuma disciplina cadastrada ainda. <a href="{% url 'criar_disciplina' %}">Cadastrar a primeira disciplina</a>.</div>
+{% endif %}
+{% endblock %}

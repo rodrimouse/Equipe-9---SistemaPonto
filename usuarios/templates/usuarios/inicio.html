@@ -1,0 +1,43 @@
+{% extends "usuarios/base.html" %}
+{% block titulo %}Início{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+  <div><h1>Olá{% if request.session.username %}, {{ request.session.username }}{% endif %}</h1>
+  <p class="sub">Resumo do sistema de ponto acadêmico.</p></div>
+  <div>
+    <a class="btn btn-sec" href="{% url 'calendario' %}">Calendário</a>
+    <a class="btn btn-sec" href="{% url 'criar_horario' %}">Cadastrar horário</a>
+    <a class="btn" href="{% url 'gerar_pdf' %}">Gerar folha de ponto</a>
+  </div>
+</div>
+
+<div class="grade-stats">
+  <a class="stat" href="{% url 'listar_professores' %}"><div class="num">{{ total_professores }}</div><div class="rot">Professores</div></a>
+  <a class="stat" href="{% url 'listar_disciplinas' %}"><div class="num">{{ total_disciplinas }}</div><div class="rot">Disciplinas</div></a>
+  <a class="stat" href="{% url 'listar_cursos' %}"><div class="num">{{ total_cursos }}</div><div class="rot">Cursos</div></a>
+  <a class="stat" href="{% url 'listar_horarios' %}"><div class="num">{{ total_horarios }}</div><div class="rot">Horários de aula</div></a>
+</div>
+
+{% if total_professores == 0 and total_disciplinas == 0 and total_cursos == 0 %}
+<div class="cartao">
+  <h2>Por onde começar</h2>
+  <ol class="passos">
+    <li>Cadastre o <a href="{% url 'criar_curso' %}">curso</a>.</li>
+    <li>Cadastre as <a href="{% url 'criar_disciplina' %}">disciplinas</a> do curso.</li>
+    <li>Cadastre os <a href="{% url 'criar_professor' %}">professores</a>, com matrícula e demais dados do cartão de ponto.</li>
+    <li>Cadastre os <a href="{% url 'criar_horario' %}">horários</a>: marque os dias da semana e veja a prévia do PDF.</li>
+    <li><a href="{% url 'gerar_pdf' %}">Gere a folha de ponto</a> do mês.</li>
+  </ol>
+</div>
+{% elif sem_horario %}
+<div class="cartao">
+  <h2>Professores sem horário cadastrado</h2>
+  <p class="sub" style="margin-bottom:8px">A folha de ponto deles sai só com o cabeçalho.</p>
+  <ul class="lista-simples">
+  {% for p in sem_horario %}
+    <li><span>{{ p.nome }}</span><a class="btn btn-sec btn-pq" href="{% url 'criar_horario' %}">Cadastrar horário</a></li>
+  {% endfor %}
+  </ul>
+</div>
+{% endif %}
+{% endblock %}
