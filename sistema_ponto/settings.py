@@ -30,10 +30,25 @@ def _lista_env(nome):
     return [x.strip() for x in os.environ.get(nome, '').split(',') if x.strip()]
 
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get(
-    'DJANGO_SECRET_KEY',
-    'django-insecure-%xi7$pw!^_9^%8gojbabi&3rj9&2!)uss#$uz4jo2+3q4u(z7!')   # só vale para desenvolvimento
+def _chave_secreta():
+    """DJANGO_SECRET_KEY > arquivo (DJANGO_SECRET_KEY_FILE ou .secret_key) > chave aleatória gerada e guardada em arquivo."""
+    chave = os.environ.get('DJANGO_SECRET_KEY')
+    if chave:
+        return chave
+    arq = Path(os.environ.get('DJANGO_SECRET_KEY_FILE') or (BASE_DIR / '.secret_key'))
+    try:
+        if arq.exists() and arq.read_text().strip():
+            return arq.read_text().strip()
+        import secrets
+        nova = secrets.token_urlsafe(64)
+        arq.write_text(nova)
+        return nova
+    except OSError:
+        import secrets
+        return secrets.token_urlsafe(64)   # sem onde gravar: vale só para este processo
+
+
+SECRET_KEY = _chave_secreta()
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DJANGO_DEBUG', '1') == '1'
@@ -42,8 +57,9 @@ ALLOWED_HOSTS = _lista_env('DJANGO_ALLOWED_HOSTS')             # ex.: seusite.py
 CSRF_TRUSTED_ORIGINS = _lista_env('DJANGO_CSRF_TRUSTED_ORIGINS')   # ex.: https://seusite.pythonanywhere.com
 
 # Cookies só por HTTPS quando não está em modo de desenvolvimento
-SESSION_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_SECURE = not DEBUG
+_COOKIE_SEGURO = os.environ.get('DJANGO_COOKIE_SECURE', '0' if DEBUG else '1') == '1'
+SESSION_COOKIE_SECURE = _COOKIE_SEGURO
+CSRF_COOKIE_SECURE = _COOKIE_SEGURO
 SESSION_COOKIE_AGE = 60 * 60 * 12          # login expira em 12 h
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
@@ -96,7 +112,7 @@ WSGI_APPLICATION = 'sistema_ponto.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': os.environ.get('DJANGO_DB_PATH') or (BASE_DIR / 'db.sqlite3'),
     }
 }
 
@@ -158,3 +174,5 @@ if os.environ.get('EMAIL_HOST'):
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'Ponto Acadêmico <nao-responda@ponto.local>')
+
+CSRF_FAILURE_VIEW = 'django.views.csrf.csrf_failure'

@@ -295,6 +295,13 @@ def criar_disciplina(request):
             messages.error(request, 'Informe uma carga horária válida (número maior que zero).')
             return redirect('criar_disciplina')
 
+        if not request.POST.get('nome', '').strip():
+            messages.error(request, 'Informe o nome da disciplina.')
+            return redirect('criar_disciplina')
+        if not Curso.objects.filter(pk=request.POST.get('curso') or 0).exists():
+            messages.error(request, 'Selecione um curso válido.')
+            return redirect('criar_disciplina')
+
         Disciplina.objects.create(
             nome=request.POST.get('nome', '').strip(),
             carga_horaria=carga,
@@ -318,6 +325,13 @@ def editar_disciplina(request, id):
                 raise ValueError
         except (TypeError, ValueError):
             messages.error(request, 'Informe uma carga horária válida (número maior que zero).')
+            return redirect('editar_disciplina', id=id)
+
+        if not request.POST.get('nome', '').strip():
+            messages.error(request, 'Informe o nome da disciplina.')
+            return redirect('editar_disciplina', id=id)
+        if not Curso.objects.filter(pk=request.POST.get('curso') or 0).exists():
+            messages.error(request, 'Selecione um curso válido.')
             return redirect('editar_disciplina', id=id)
 
         disciplina.nome = request.POST.get('nome', '').strip()

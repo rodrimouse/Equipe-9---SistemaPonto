@@ -99,8 +99,21 @@ class ImportadorTests(unittest.TestCase):
         primeira = gravar(norm, C, D, P, H)
         segunda = gravar(norm, C, D, P, H)
         self.assertEqual(primeira['horario'], (16, 0))
-        self.assertEqual(segunda, {'curso': (0, 2), 'disciplina': (0, 10), 'professor': (0, 5), 'horario': (0, 16)})
+        self.assertEqual(segunda, {'curso': (0, 2), 'disciplina': (0, 10), 'professor': (0, 5), 'horario': (0, 16), 'usuario': (0, 0)})
         self.assertEqual(len(H.linhas), 16)
+
+    def test_usuarios_do_seed_sao_validos(self):
+        dados = ler_arquivo(EXEMPLO)
+        norm, erros, _ = validar(dados)
+        self.assertEqual(erros, [])
+        self.assertEqual({u['username']: u['tipo'] for u in norm['usuarios']},
+                         {'admin': 'admin', 'funcionario': 'funcionario'})
+
+    def test_usuario_invalido_e_recusado(self):
+        dados = copy.deepcopy(ler_arquivo(EXEMPLO))
+        dados['usuarios'] = [{'username': 'x', 'email': 'sem-arroba', 'senha': '123', 'tipo': 'admin'}]
+        _, erros, _ = validar(dados)
+        self.assertTrue(any('usuarios[1]' in e for e in erros))
 
 
 if __name__ == '__main__':

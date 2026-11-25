@@ -55,7 +55,27 @@ def _texto(valor):
 def validar(dados):
     """Retorna (normalizado, erros, avisos). Se houver erros, nada deve ser gravado."""
     erros, avisos = [], []
-    norm = {'cursos': [], 'disciplinas': [], 'professores': [], 'horarios': []}
+    norm = {'cursos': [], 'disciplinas': [], 'professores': [], 'horarios': [], 'usuarios': []}
+
+    # ---------------- usuários (opcional)
+    vistos_u = set()
+    for i, u in enumerate(dados.get('usuarios') or [], start=1):
+        if not isinstance(u, dict):
+            erros.append(f'usuarios[{i}]: formato inválido.')
+            continue
+        nome_u, email_u, senha_u = _texto(u.get('username')), _texto(u.get('email')), _texto(u.get('senha'))
+        tipo_u = _texto(u.get('tipo')) or 'funcionario'
+        if not nome_u or not email_u or '@' not in email_u or len(senha_u) < 6:
+            erros.append(f'usuarios[{i}]: informe username, e-mail válido e senha (mín. 6 caracteres).')
+            continue
+        if tipo_u not in ('admin', 'funcionario'):
+            erros.append(f'usuarios[{i}]: tipo deve ser admin ou funcionario.')
+            continue
+        if nome_u in vistos_u:
+            avisos.append(f'usuário repetido no arquivo: {nome_u!r} (ignorado).')
+            continue
+        vistos_u.add(nome_u)
+        norm['usuarios'].append({'username': nome_u, 'email': email_u, 'senha': senha_u, 'tipo': tipo_u})
 
     # ---------------- cursos
     cursos_vistos = {}
@@ -176,12 +196,22 @@ def validar(dados):
     return norm, erros, avisos
 
 
-def gravar(norm, Curso, Disciplina, Professor, HorarioAula):
+def gravar(norm, Curso, Disciplina, Professor, HorarioAula, Usuario=None):
     """Grava no banco sem duplicar. Retorna {'curso': (criados, existentes), ...}."""
-    resumo = {k: [0, 0] for k in ('curso', 'disciplina', 'professor', 'horario')}
+    resumo = {k: [0, 0] for k in ('curso', 'disciplina', 'professor', 'horario', 'usuario')}
 
     def conta(chave_, criado):
         resumo[chave_][0 if criado else 1] += 1
+
+    if Usuario is not None:
+        for u in norm.get('usuarios', []):
+            if Usuario.objects.filter(username=u['username']).exists() or Usuario.objects.filter(email=u['email']).exists():
+                conta('usuario', False)
+                continue
+            novo = Usuario(username=u['username'], email=u['email'], tipo=u['tipo'])
+            novo.definir_senha(u['senha'])
+            novo.save()
+            conta('usuario', True)
 
     cursos = {}
     for nome in norm['cursos']:

@@ -1,4 +1,5 @@
 Django>=6.0
 reportlab>=4.0
 pypdf>=5.0
-tzdata; sys_platform == "win32"
+gunicorn>=22.0
+tzdata

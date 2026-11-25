@@ -22,107 +22,82 @@ O sistema preenche o **PDF oficial** (cabeçalho, grade horária semanal e folha
 
 Python 3.12+ · Django 6 · SQLite (padrão) · ReportLab + pypdf (geração do PDF) · HTML/CSS/JS puros (sem frameworks de front-end).
 
-## Instalação
+## Integrantes e turno
+
+| Nome completo | RA | Turno |
+|---------------|----|-------|
+| Rodrigo Miyahira Suguino | 2040482312003 | Vespertino |
+
+**Equipe 9** · Laboratório de Engenharia de Software · Prof. Carlos Veríssimo
+
+## Versões
+
+Python 3.12 (no Docker; também roda em 3.13) · Django 6 · SQLite · Gunicorn · ReportLab 4 · pypdf 5.
+
+## Pré-requisitos
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows/Mac) ou Docker Engine + Compose (Linux)
+- Git
+
+## Como executar (Docker)
+
+```bash
+git clone https://github.com/rodrimouse/Equipe-9---SistemaPonto.git
+cd Equipe-9---SistemaPonto
+git checkout v1.0-mvp
+docker compose up --build
+```
+
+Acesse <http://localhost:8000/>. Na primeira execução o contêiner aplica as migrações e carrega os dados de exemplo (cursos, disciplinas, professores, horários e usuários de teste). Os dados ficam no volume `ponto-dados`. Para parar: `Ctrl+C`; para apagar tudo: `docker compose down -v`.
+
+### Sem Docker (alternativa)
 
 ```bash
 python -m venv venv
-venv\Scripts\activate            # Windows   (Linux/Mac: source venv/bin/activate)
+venv\Scripts\activate            # Linux/Mac: source venv/bin/activate
 python -m pip install -r requirements.txt
 python manage.py migrate
+python manage.py popular_banco
 python manage.py runserver
 ```
 
-Acesse <http://127.0.0.1:8000/>.
+## Usuários e senhas de teste
 
-**Primeiro usuário** (o banco novo vem vazio):
+| Perfil | Usuário | Senha |
+|--------|---------|-------|
+| Administrador | `admin` | `Admin@2026` |
+| Funcionário | `funcionario` | `Func@2026` |
 
-```bash
-python manage.py shell -c "from usuarios.models import Usuario; u = Usuario(username='admin', email='admin@exemplo.com', tipo='admin'); u.definir_senha('troque-esta-senha'); u.save()"
-```
+O administrador gerencia usuários; o funcionário não vê essa área. Senhas ficam gravadas apenas como hash PBKDF2.
 
-> Já usava o sistema antes desta versão? A migração `0007` converte automaticamente as senhas antigas (texto puro) em hash. Basta rodar `python manage.py migrate`.
-
-## Popular o banco com dados
-
-Edite o arquivo `dados_iniciais.json` (o que vem no projeto é um **exemplo fictício**) e rode:
-
-```bash
-python manage.py popular_banco
-```
-
-- Pode rodar várias vezes: não duplica nada e não altera o que já existe.
-- Se houver erro no arquivo, o comando lista **todos** e não grava nada.
-- `--arquivo outro.json` usa outro arquivo; `--limpar` apaga cadastros antes (pede confirmação).
-
-Formato do arquivo:
-
-```json
-{
-  "cursos": ["Análise e Desenvolvimento de Sistemas"],
-  "disciplinas": [{"nome": "Banco de Dados", "carga_horaria": 80, "curso": "Análise e Desenvolvimento de Sistemas"}],
-  "professores": [{"nome": "Ana Paula Ribeiro", "email": "ana@exemplo.com", "matricula": "100201", "regime_juridico": "CLT", "categoria": "Prof. I"}],
-  "horarios": [{"professor": "Ana Paula Ribeiro", "disciplina": "Banco de Dados", "dias": ["Segunda", "Quarta"], "inicio": "19:00", "fim": "20:40", "tipo": "presencial"}]
-}
-```
-
-## Testes
+## Como executar os testes
 
 ```bash
 python manage.py test
 ```
 
-São **81 testes**: 42 de lógica (PDF, importador, relatório — não precisam de banco) e 39 de integração com o Django (login, senhas, recuperação de senha, cadastros, calendário, PDF/ZIP, relatório).
+Com Docker: `docker compose run --rm web python manage.py test`.
+A suíte tem 83 testes automatizados (importador, geração do PDF, relatório e views). O plano com 48 casos manuais está na Documentação Final.
 
-## Configuração (variáveis de ambiente)
+## Variáveis de ambiente
 
-Sem nenhuma variável o projeto roda em modo de desenvolvimento. Para produção veja [docs/DEPLOY.md](docs/DEPLOY.md).
+| Variável | Função | Padrão |
+|----------|--------|--------|
+| `DJANGO_SECRET_KEY` | Chave secreta (se vazia, é gerada e guardada em arquivo) | gerada |
+| `DJANGO_DEBUG` | `0` desliga o modo debug | `1` (`0` no Docker) |
+| `DJANGO_ALLOWED_HOSTS` | Hosts permitidos, separados por vírgula | vazio (`localhost,127.0.0.1` no Docker) |
+| `DJANGO_COOKIE_SECURE` | Cookies só por HTTPS | `1` se DEBUG=0 (`0` no Docker local) |
+| `DJANGO_DB_PATH` | Caminho do banco SQLite | `db.sqlite3` (`/data/db.sqlite3` no Docker) |
+| `PONTO_UNIDADE` | Texto de “Unidade:” no PDF | vazio |
 
-| Variável | Para que serve | Padrão |
-|----------|----------------|--------|
-| `DJANGO_SECRET_KEY` | Chave secreta (obrigatória em produção) | chave de desenvolvimento |
-| `DJANGO_DEBUG` | `0` desliga o modo debug | `1` |
-| `DJANGO_ALLOWED_HOSTS` | Domínios permitidos, separados por vírgula | vazio |
-| `DJANGO_CSRF_TRUSTED_ORIGINS` | Origens HTTPS confiáveis | vazio |
-| `PONTO_UNIDADE` | Texto que substitui o "xxxxxxxxxx" ao lado de "Unidade:" no PDF | vazio |
-| `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD` | Envio real de e-mail (recuperação de senha) | e-mails aparecem no terminal |
+Exemplo em `.env.example`. Nenhum segredo é versionado.
 
-## Estrutura do projeto
+## Links
 
-```
-Ponto-Academico/
-├── manage.py
-├── dados_iniciais.json          # exemplo de carga de dados
-├── documentos/Modelo de Ponto.pdf   # modelo oficial (Anexo I)
-├── sistema_ponto/               # configurações do Django
-└── usuarios/
-    ├── models.py                # Curso, Disciplina, Professor, HorarioAula, Feriado, Ocorrencia, Usuario
-    ├── views.py                 # telas e regras de acesso
-    ├── pdf_ponto.py             # ★ gerador do PDF (Python puro, sem Django)
-    ├── relatorio.py             # ★ cálculo do relatório e conflitos (Python puro)
-    ├── importador.py            # ★ importação do JSON (Python puro)
-    ├── management/commands/popular_banco.py
-    ├── templates/usuarios/      # telas (base.html + uma por página)
-    └── tests/                   # testes automatizados
-```
-
-Os módulos marcados com ★ não dependem do Django, então são fáceis de testar e de reaproveitar.
-
-## Como o PDF é gerado
-
-O sistema **não imprime a tela**. Ele abre o PDF oficial e escreve o texto nas coordenadas exatas de cada célula. Para qualquer mês, a tabela de frequência é redesenhada (dias, dias da semana, domingos em cinza). Detalhes em [docs/MODELO_DE_DADOS.md](docs/MODELO_DE_DADOS.md).
-
-## Segurança
-
-- Senhas guardadas com **PBKDF2** (hash do Django); nunca são exibidas.
-- Recuperação por **link assinado**, válido por 1 hora e de uso único; o sistema não revela se um e-mail existe.
-- Todas as telas (exceto login e recuperação) exigem login; exclusões só por `POST` com proteção CSRF.
-- Login renova a sessão (evita fixação de sessão) e expira em 12 horas.
-- Apenas administradores gerenciam usuários; ninguém exclui ou rebaixa a si mesmo.
-
-**Limitações conhecidas:** não há bloqueio por excesso de tentativas de login; os perfis são só *administrador* e *funcionário* (funcionários acessam os cadastros).
+- **Vídeo de apresentação:** VIDEO_LINK_AQUI
+- **Protótipo no Figma:** não elaborado (ver Documentação Final, seção 9)
+- **Sistema publicado:** não há (execução local via Docker)
 
 ## Documentação
 
-- [Manual do usuário](docs/MANUAL_DO_USUARIO.md)
-- [Modelo de dados e funcionamento do PDF](docs/MODELO_DE_DADOS.md)
-- [Publicação (deploy)](docs/DEPLOY.md)
+`docs/MANUAL_DO_USUARIO.md`, `docs/MODELO_DE_DADOS.md`, `docs/DEPLOY.md`.

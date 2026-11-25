@@ -1,0 +1,15 @@
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      DJANGO_DEBUG: "0"
+      DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1"
+      DJANGO_COOKIE_SECURE: "0"          # acesso local por HTTP; use 1 atrás de HTTPS
+      DJANGO_DB_PATH: /data/db.sqlite3
+      DJANGO_SECRET_KEY_FILE: /data/.secret_key
+    volumes:
+      - ponto-dados:/data
+volumes:
+  ponto-dados:

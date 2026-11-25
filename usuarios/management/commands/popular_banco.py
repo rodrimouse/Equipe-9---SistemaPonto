@@ -6,7 +6,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
 from usuarios.importador import gravar, ler_arquivo, validar
-from usuarios.models import Curso, Disciplina, HorarioAula, Professor
+from usuarios.models import Curso, Disciplina, HorarioAula, Professor, Usuario
 
 
 class Command(BaseCommand):
@@ -46,9 +46,9 @@ class Command(BaseCommand):
                 Disciplina.objects.all().delete()
                 Professor.objects.all().delete()
                 Curso.objects.all().delete()
-            resumo = gravar(norm, Curso, Disciplina, Professor, HorarioAula)
+            resumo = gravar(norm, Curso, Disciplina, Professor, HorarioAula, Usuario)
 
-        nomes = {'curso': 'cursos', 'disciplina': 'disciplinas', 'professor': 'professores', 'horario': 'horários'}
+        nomes = {'curso': 'cursos', 'disciplina': 'disciplinas', 'professor': 'professores', 'horario': 'horários', 'usuario': 'usuários'}
         self.stdout.write(self.style.SUCCESS('Importação concluída:'))
         for k, (novos, existentes) in resumo.items():
             self.stdout.write(f'  {nomes[k]}: {novos} novo(s), {existentes} já existia(m)')
